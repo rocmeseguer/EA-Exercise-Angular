@@ -1,0 +1,32 @@
+
+<h1>Reactive Form Example:</h1>
+
+{{ this.message }}
+
+<h3>Create Todo</h3>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <p>
+            <label>Id:</label>
+            <input type="text" formControlName="id">
+        </p>
+        <p>
+            <label>Name:</label>
+            <input type="text" formControlName="name">
+        </p>
+        <p>
+        <select formControlName="user">
+            <option [ngValue]="null" disabled>Choose the user</option>
+            <option *ngFor="let user of users" [ngValue]="user._id">
+             {{ user.name }}
+            </option>
+          </select> 
+        </p>
+        <p>
+            <label>Completed:</label>
+            <input type="checkbox" formControlName="completed">
+        </p>
+        <p>
+            <button type="submit" [disabled]="!form.valid">Submit</button>
+        </p>
+    </form>

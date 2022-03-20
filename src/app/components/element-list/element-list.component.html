@@ -1,0 +1,13 @@
+<p>element-list works!</p>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <input type="text" formControlName="name">
+    <button type="submit">Filter</button>
+</form>
+
+
+<ul>
+    <li *ngFor="let todo of filteredTodos">
+        {{ todo.name }}
+    </li>
+</ul>
