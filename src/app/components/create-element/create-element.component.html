@@ -5,28 +5,47 @@
 
 <h3>Create Todo</h3>
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <p>
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+<div class="container">
+    <div class="row">
+        <div class="col-25">
             <label>Id:</label>
-            <input type="text" formControlName="id">
-        </p>
-        <p>
-            <label>Name:</label>
+        </div>
+        <div class="col-75">
+            <input type="number" formControlName="id">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-25">
+            <label>Task Name:</label>
+        </div>
+        <div class="col-75">
             <input type="text" formControlName="name">
-        </p>
-        <p>
-        <select formControlName="user">
-            <option [ngValue]="null" disabled>Choose the user</option>
-            <option *ngFor="let user of users" [ngValue]="user._id">
-             {{ user.name }}
-            </option>
-          </select> 
-        </p>
-        <p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-25">
+            <label>User:</label>
+        </div>
+        <div class="col-75">
+            <select formControlName="user">
+                <option [ngValue]="null" disabled>Choose the user</option>
+                <option *ngFor="let user of users" [ngValue]="user._id">
+                {{ user.name }}
+                </option>
+            </select> 
+        </div>
+    </div>    
+    <div class="row">
+        <div class="col-25">
             <label>Completed:</label>
-            <input type="checkbox" formControlName="completed">
-        </p>
-        <p>
-            <button type="submit" [disabled]="!form.valid">Submit</button>
-        </p>
-    </form>
+        </div>
+        <div class="col-75">
+                <input type="checkbox" formControlName="completed">
+        </div>   
+    </div>
+    <div class="row">
+        <input type="submit" [disabled]="!form.valid" value="Submit">
+    </div> 
+</div>
+</form>
