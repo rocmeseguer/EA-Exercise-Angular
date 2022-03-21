@@ -13,6 +13,10 @@
         </div>
         <div class="col-75">
             <input type="number" formControlName="id">
+            <div
+                *ngIf="form.get('id')?.hasError('required') && form.get('id')?.touched">
+                    <span>El Id del producto <strong>es obligatorio</strong></span>
+            </div>
         </div>
     </div>
     <div class="row">
