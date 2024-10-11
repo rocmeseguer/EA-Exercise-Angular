@@ -102,5 +102,7 @@
       }
     }
   },
-  "defaultProject": "ea-exercise"
+  "cli": {
+    "analytics": false
+  }
 }

@@ -33,4 +33,7 @@ node_modules/
 # IntelliJ IDEA files
 .idea/
 
+# Angular
+.angular/
+
 

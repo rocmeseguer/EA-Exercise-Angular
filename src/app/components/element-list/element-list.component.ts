@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 
 import { Todo } from 'src/app/models/todo';
 import { TodoService } from '../../services/todo-service.service';
@@ -15,9 +15,9 @@ export class ElementListComponent implements OnInit {
   filteredTodos : Todo[] = []; // filtered
   downloadedTodos : Todo[] = []; // download
   message = "";
-  form : FormGroup;
+  form : UntypedFormGroup;
 
-  constructor(private _fb: FormBuilder, private _todoService: TodoService) { 
+  constructor(private _fb: UntypedFormBuilder, private _todoService: TodoService) { 
     this.form = this._fb.group({
       "name": ['']
     })

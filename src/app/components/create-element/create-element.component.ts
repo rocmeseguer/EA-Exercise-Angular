@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 
 import { User } from '../../models/user';
 import { UserService } from '../../services/user-service.service';
@@ -13,11 +13,11 @@ import { TodoService } from '../../services/todo-service.service';
 })
 export class CreateElementComponent implements OnInit {
 
-  form : FormGroup;
+  form : UntypedFormGroup;
   users : User[] = [];
   message = "";
 
-  constructor(private _fb: FormBuilder, private _userService: UserService, private _todoService: TodoService) {
+  constructor(private _fb: UntypedFormBuilder, private _userService: UserService, private _todoService: TodoService) {
 
     this.form = this._fb.group({
       "id": ['', Validators.required],
