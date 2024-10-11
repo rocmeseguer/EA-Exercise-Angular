@@ -1,42 +1,36 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
+# Dist directory (for compiled output) and  build artifacts
+dist/
+out/
+build/
 
-# Compiled output
-/dist
-/tmp
-/out-tsc
-/bazel-out
+# JS Code
+src/*.js
+src/*.js.map
 
-# Node
-/node_modules
-npm-debug.log
-yarn-error.log
+# Dependency directory
+node_modules/
 
-# IDEs and editors
+# dotenv environment variables file
+.env
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# TypeScript cache
+*.tscache
+
+# Temp files
+*.tmp
+*.temp
+
+# Editor settings
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA files
 .idea/
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
 
-# Visual Studio Code
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history/*
 
-# Miscellaneous
-/.angular/cache
-.sass-cache/
-/connect.lock
-/coverage
-/libpeerconnection.log
-testem.log
-/typings
-
-# System files
-.DS_Store
-Thumbs.db
