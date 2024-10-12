@@ -7,8 +7,15 @@
 </form>
 
 
-<ul>
-    <li *ngFor="let todo of filteredTodos">
-        {{ todo.name }}
-    </li>
-</ul>
+
+<table class="table table-sm table-hover">
+    <tbody>
+      <tr *ngFor="let todo of filteredTodos">
+        <td>{{todo.name}}</td>
+        <td>
+            <button (click)="onEdit(todo)">Edit</button>
+            <button (click)="onDelete(todo._id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>

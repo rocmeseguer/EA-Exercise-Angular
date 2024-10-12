@@ -3,28 +3,20 @@
 
 {{ this.message }}
 
-<h3>Create Todo</h3>
+<h3>Todo</h3>
 
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
 <div class="container">
-    <div class="row">
-        <div class="col-25">
-            <label>Id:</label>
-        </div>
-        <div class="col-75">
-            <input type="number" formControlName="id">
-            <div
-                *ngIf="form.get('id')?.hasError('required') && form.get('id')?.touched">
-                    <span>El Id del producto <strong>es obligatorio</strong></span>
-            </div>
-        </div>
-    </div>
     <div class="row">
         <div class="col-25">
             <label>Task Name:</label>
         </div>
         <div class="col-75">
             <input type="text" formControlName="name">
+            <div
+                *ngIf="form.get('name')?.hasError('required') && form.get('name')?.touched">
+                    <span>El Name del producto <strong>es obligatorio</strong></span>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -38,6 +30,11 @@
                 {{ user.name }}
                 </option>
             </select> 
+            <div
+            *ngIf="form.get('user')?.hasError('required') && form.get('user')?.touched">
+                <span>El User del producto <strong>es obligatorio</strong></span>
+            </div>
+
         </div>
     </div>    
     <div class="row">

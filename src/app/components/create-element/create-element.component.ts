@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';  // Para obtener el parámetro
 
 import { User } from '../../models/user';
 import { UserService } from '../../services/user-service.service';
@@ -15,39 +16,56 @@ export class CreateElementComponent implements OnInit {
 
   form : UntypedFormGroup;
   users : User[] = [];
+  todo : Todo;
   message = "";
 
-  constructor(private _fb: UntypedFormBuilder, private _userService: UserService, private _todoService: TodoService) {
+  constructor(
+    private _fb: UntypedFormBuilder, 
+    private _userService: UserService, 
+    private _todoService: TodoService,
+    private route: ActivatedRoute // Para optener el parametro
+  ) {
 
     this.form = this._fb.group({
-      "id": ['', Validators.required],
-      "user": [''],
-      "name": [''],
+      "user": ['', Validators.required],
+      "name": ['', Validators.required],
       "completed": [''],
 
     })
+
+    this.todo = {
+      _id : "",
+      name : "",
+      user : "",
+      completed : false
+    }
 
    }
 
   ngOnInit(): void {
 
     // Getting users list
-    this._userService.getUsers().subscribe({
-      next: data => {
-        console.log(data);
-        this.users = data;
-      }, 
-      error: error => {
-      console.log(error);
-      }
-    })
+    this.getUsersList();
+
+    // Obtener el 'Todo' pasado a través de la ruta llamada desde Edit
+    const todoJson = this.route.snapshot.paramMap.get('todo');
+    console.log("Parametro " + todoJson);
+
+    if (todoJson) {
+      this.todo = JSON.parse(todoJson);  // Parsear el JSON
+      this.form.patchValue({
+        name: this.todo.name,
+        user: this.todo.user,
+        completed: this.todo.completed,
+      });
+    }
   }
 
   onSubmit() {
 
     // New Todo
     const newTodo : Todo = {
-      id : this.form.get('id')?.value,
+      _id : (this.todo._id !== "" ? this.todo._id : Todo.generateMongoId()),
       name : this.form.get('name')?.value,
       user : this.form.get('user')?.value,
       completed : (this.form.get('completed')?.value ? true : false)
@@ -65,5 +83,19 @@ export class CreateElementComponent implements OnInit {
       }
     })
   }
+
+  // Getting todos list
+  getUsersList() {
+    this._userService.getUsers().subscribe({
+      next: data => {
+        console.log(data);
+        this.users = data;
+      }, 
+      error: error => {
+      console.log(error);
+      }
+    })
+  }
+   
 
 }
