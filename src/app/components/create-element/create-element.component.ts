@@ -1,101 +1,70 @@
 import { Component, OnInit } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';  // Para obtener el parámetro
+import { CommonModule } from '@angular/common';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
-import { User } from '../../models/user';
-import { UserService } from '../../services/user-service.service';
-import { Todo } from 'src/app/models/todo';
+import { Todo } from '../../models/todo';
 import { TodoService } from '../../services/todo-service.service';
 
 @Component({
   selector: 'app-create-element',
+  standalone: true,
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './create-element.component.html',
   styleUrls: ['./create-element.component.css']
 })
 export class CreateElementComponent implements OnInit {
 
-  form : UntypedFormGroup;
-  users : User[] = [];
-  todo : Todo;
-  message = "";
+  _todoId?: string;
+  _form = new FormGroup({
+    userId: new FormControl('', Validators.required),
+    id: new FormControl('', Validators.required),
+    title: new FormControl('', Validators.required),
+    completed: new FormControl(false)
+  });
 
   constructor(
-    private _fb: UntypedFormBuilder, 
-    private _userService: UserService, 
-    private _todoService: TodoService,
-    private route: ActivatedRoute // Para optener el parametro
-  ) {
+    private _route: ActivatedRoute, // Para optener el parametro de la URL
+    private _todoService: TodoService
+  ) { }
 
-    this.form = this._fb.group({
-      "user": ['', Validators.required],
-      "name": ['', Validators.required],
-      "completed": [''],
-
-    })
-
-    this.todo = {
-      _id : "",
-      name : "",
-      user : "",
-      completed : false
-    }
-
-   }
-
-  ngOnInit(): void {
-
-    // Getting users list
-    this.getUsersList();
-
-    // Obtener el 'Todo' pasado a través de la ruta llamada desde Edit
-    const todoJson = this.route.snapshot.paramMap.get('todo');
-    console.log("Parametro " + todoJson);
-
-    if (todoJson) {
-      this.todo = JSON.parse(todoJson);  // Parsear el JSON
-      this.form.patchValue({
-        name: this.todo.name,
-        user: this.todo.user,
-        completed: this.todo.completed,
+  ngOnInit() {
+    this._todoId = this._todoId || this._route.snapshot.paramMap.get('id') || undefined;
+    if (this._todoId) {
+      this._todoService.getTodo(this._todoId)
+        .subscribe(todo => {
+          if (todo) {
+            this._form.setValue({
+              userId: todo.userId,
+              id: todo.id,
+              title: todo.title,
+              completed: todo.completed
+          });
+        }
       });
     }
   }
 
+
   onSubmit() {
-
-    // New Todo
-    const newTodo : Todo = {
-      _id : (this.todo._id !== "" ? this.todo._id : Todo.generateMongoId()),
-      name : this.form.get('name')?.value,
-      user : this.form.get('user')?.value,
-      completed : (this.form.get('completed')?.value ? true : false)
+    if (this._form.valid) {
+      console.log(this._form.value as Todo);
+      this.onCreate(this._form.value as Todo);
+      this._form.reset();  
     }
-
-    // POST of the new TODO
-    this._todoService.addTodo(newTodo).subscribe({
-      next: data => {
-        console.log(data);
-        this.message = "Created!"
-      }, 
-      error: error => {
-      console.log(error);
-      this.message = "Error!"
-      }
-    })
   }
 
-  // Getting todos list
-  getUsersList() {
-    this._userService.getUsers().subscribe({
-      next: data => {
-        console.log(data);
-        this.users = data;
-      }, 
-      error: error => {
-      console.log(error);
-      }
-    })
+  onCreate(todo: Todo ) {
+    console.log("onCreate " + todo);
+    this._todoService.createTodo(todo)
+      .subscribe({
+        next: data => {
+          console.log(data);
+        },
+        error: error => {
+          console.log(error);
+        }
+      })
   }
-   
-
 }

@@ -1,13 +1,13 @@
 export class Todo {
-    _id: string;
-    name: string;
-    user: string | undefined;
+    userId: string;
+    id: string;
+    title: string;
     completed: boolean;
 
-    constructor(name: string, user?: string, completed?: boolean) {
-        this._id = Todo.generateMongoId();
-        this.name = name;
-        this.user = user;
+    constructor(userId?: string, id?: string, title?: string, completed?: boolean) {
+        this.userId = ( userId ? userId : "" );
+        this.id = ( id ? id : "" );
+        this.title = ( title ? title : "" );
         this.completed = ( completed ? completed : false );
     }   
 

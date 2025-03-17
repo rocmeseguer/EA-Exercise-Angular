@@ -1,35 +1,32 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
 import { Todo } from '../models/todo';
-
 
 @Injectable({
   providedIn: 'root'
 })
 
 export class TodoService {
-  url = 'http://localhost:4000/api/todos';
-
-  constructor(private http: HttpClient) { }
+  private _url = 'https://jsonplaceholder.typicode.com/todos';
+  
+  constructor( private _http: HttpClient ) { }
 
   getTodos(): Observable<Todo[]> {
-    return this.http.get<Todo[]>(this.url );
-  }
-
-  deleteTodo(id: string): Observable<Todo> {
-    return this.http.delete<Todo>(this.url + '/' + id);
-  }
-
-  addTodo(Todo: Todo): Observable<Todo> {
-    return this.http.post<Todo>(this.url , Todo) ;
+    return this._http.get<Todo[]>(this._url );
   }
 
   getTodo(id: string): Observable<Todo> {
-    return this.http.get<Todo>(this.url + '/' + id);
-  }
+    return this._http.get<Todo>(this._url + '/' + id);
+  } 
 
-  editTodo(id: string, Todo: Todo): Observable<Todo> {
-    return this.http.put<Todo>(this.url + '/' + id, Todo);
+  deleteTodo(id: string): Observable<Todo> {
+    return this._http.delete<Todo>(this._url + '/' + id);
+  } 
+
+  createTodo(todo: Todo): Observable<Todo> {
+    const fakeTodo = new Todo("fakeUser", "fakeId", "Fake Todo", false);
+    return of(fakeTodo);
+    //return this._http.post<Todo>(this._url, todo);
   }
 }

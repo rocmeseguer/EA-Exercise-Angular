@@ -1,52 +1,27 @@
-
-<h1>Reactive Form Example:</h1>
-
-{{ this.message }}
-
-<h3>Todo</h3>
-
-<form [formGroup]="form" (ngSubmit)="onSubmit()">
-<div class="container">
-    <div class="row">
-        <div class="col-25">
-            <label>Task Name:</label>
-        </div>
-        <div class="col-75">
-            <input type="text" formControlName="name">
-            <div
-                *ngIf="form.get('name')?.hasError('required') && form.get('name')?.touched">
-                    <span>El Name del producto <strong>es obligatorio</strong></span>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-25">
-            <label>User:</label>
-        </div>
-        <div class="col-75">
-            <select formControlName="user">
-                <option [ngValue]="null" disabled>Choose the user</option>
-                <option *ngFor="let user of users" [ngValue]="user._id">
-                {{ user.name }}
-                </option>
-            </select> 
-            <div
-            *ngIf="form.get('user')?.hasError('required') && form.get('user')?.touched">
-                <span>El User del producto <strong>es obligatorio</strong></span>
-            </div>
-
-        </div>
-    </div>    
-    <div class="row">
-        <div class="col-25">
-            <label>Completed:</label>
-        </div>
-        <div class="col-75">
-                <input type="checkbox" formControlName="completed">
-        </div>   
-    </div>
-    <div class="row">
-        <input type="submit" [disabled]="!form.valid" value="Submit">
-    </div> 
+<div class="item-card">
+    <h3>New Element</h3>
+    <form [formGroup]="_form" (ngSubmit)="onSubmit()" class="todo-form">
+        <label>
+          User ID:
+          <input type="text" formControlName="userId" required>
+        </label>
+      
+        <label>
+          Todo ID:
+          <input type="text" formControlName="id" required>
+        </label>
+      
+        <label>
+          Title:
+          <input type="text" formControlName="title" required>
+        </label>
+      
+        <label>
+          Completed:
+          <input type="checkbox" formControlName="completed">
+        </label>
+        <button type="submit" [disabled]="_form.invalid">
+            {{ _todoId ? 'Actualizar Todo' : 'Crear Todo' }}
+          </button>      
+    </form>
 </div>
-</form>
