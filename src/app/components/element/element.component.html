@@ -1,11 +1,26 @@
+<!-- ============================================ -->
+<!-- DATA BINDING EXAMPLES IN THIS TEMPLATE       -->
+<!-- ============================================ -->
+
 <div class="item-card">
-    <h3>{{ _todo.title }}</h3>
+    <!-- INTERPOLATION - Logic to View -->
+    <!-- {{ }} displays component properties in the template -->
+    <h3>{{ _todo.title | uppercase }}</h3>
+    
+    <!-- INTERPOLATION - Displaying computed values -->
     <p><strong>ID:</strong> {{ _todo.id }}</p>
     <p><strong>Usuario:</strong> {{ _todo.userId ? _todo.userId : 'No asignado' }}</p>
+    
     <p><strong>Estado:</strong> 
-      <span [class.completed]="_todo.completed" [class.pending]="!_todo.completed">
-        {{ _todo.completed ? '✔ Completado' : '⏳ Pendiente' }}
-      </span>
+        <!-- PROPERTY BINDING - Logic to View -->
+        <!-- [class.completed] applies CSS class conditionally -->
+        <!-- [class.pending] applies CSS class when todo is not completed -->
+        <span [class.completed]="_todo.completed" [class.pending]="!_todo.completed">
+            <!-- INTERPOLATION - Ternary operator in template -->
+            {{ _todo.completed ? '✔ Completado' : '⏳ Pendiente' }}
+        </span>
     </p>
-  </div>
-  
+
+    <!-- INTERPOLATION - Using date pipe -->
+    <p><strong>Last Updated:</strong> {{ today | date:'short' }}</p>
+</div>

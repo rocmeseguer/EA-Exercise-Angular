@@ -6,7 +6,7 @@ input[type=text], select, textarea {
     resize: vertical;
   }
 
-input[type=button], input[type=submit], input[type=reset] {
+  input[type=button], input[type=submit], input[type=reset] {
     background-color: #04AA6D;
     border: none;
     color: white;
@@ -14,5 +14,24 @@ input[type=button], input[type=submit], input[type=reset] {
     text-decoration: none;
     margin: 4px 2px;
     cursor: pointer;
+  }
+
+  /* Filter buttons */
+  .filter-buttons {
+    margin: 10px 0;
+  }
+
+  .filter-buttons button {
+    background-color: #2196F3;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    margin: 2px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .filter-buttons button:hover {
+    background-color: #0b7dda;
   }
 

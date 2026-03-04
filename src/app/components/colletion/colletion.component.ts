@@ -1,93 +1,197 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormGroup, FormControl } from '@angular/forms';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { Todo } from '../../models/todo';
 import { TodoService } from '../../services/todo-service.service';
+import { TodoItemComponent } from '../todo-item/todo-item.component';
+import { FilterTodoPipe } from '../../pipes/filter-todo.pipe';
 
+/**
+ * ============================================
+ * COMPONENT ARCHITECTURE - STANDALONE COMPONENT
+ * ============================================
+ * This is a standalone component (no NgModule needed).
+ * It demonstrates:
+ * - Parent-child component communication with Input/Output
+ * - Reactive Forms for user input
+ * - Observable pattern for async data
+ * - Custom pipes for data transformation
+ */
 @Component({
-  selector: 'app-colletion',
-  standalone: true,
-  imports: [CommonModule , ReactiveFormsModule],
-  templateUrl: './colletion.component.html',
-  styleUrls: ['./colletion.component.css']
+    selector: 'app-colletion',
+    standalone: true,
+    imports: [
+        CommonModule, 
+        ReactiveFormsModule,
+        TodoItemComponent,
+        FilterTodoPipe
+    ],
+    templateUrl: './colletion.component.html',
+    styleUrls: ['./colletion.component.css']
 })
+export class CollectionComponent implements OnInit {
 
-export class CollectionComponent {
-  _form = new FormGroup({
-    title: new FormControl('')
-  });
-  _filteredTodos : Todo[] = []; // filtered
-  _downloadedTodos : Todo[] = []; // downloaded
-  _message: string = "";
+    /**
+     * ============================================
+     * REACTIVE FORMS
+     * ============================================
+     * FormGroup manages the form state and validation.
+     * FormControl manages individual form fields.
+     */
+    _form = new FormGroup({
+        title: new FormControl('')
+    });
 
-  constructor(
-    private _router: Router,
-    private _todoService: TodoService
-  ) { }
+    /**
+     * ============================================
+     * TYPESCRIPT - TYPE DEFINITIONS
+     * ============================================
+     * All properties have explicit types.
+     * _downloadedTodos: raw data from API
+     * _filteredTodos: data after applying filters
+     * _isLoading: tracks loading state for *ngIf
+     * _filterStatus: current filter (all/completed/pending)
+     */
+    _filteredTodos: Todo[] = [];
+    _downloadedTodos: Todo[] = [];
+    _isLoading: boolean = false;
+    _filterStatus: string = 'all';
+    _message: string = '';
 
-  ngOnInit(): void {
-    this.getTodosList();
-  }
+    /**
+     * ============================================
+     * DEPENDENCY INJECTION
+     * ============================================
+     * Services are injected via the constructor.
+     * Private properties are prefixed with underscore.
+     */
+    constructor(
+        private _router: Router,
+        private _todoService: TodoService
+    ) { }
 
-  onSubmit() {
-    console.log(this._form.value);
-    const title = this._form.get('title')?.value;
-    if (title == null || title == "") {
-      this._message = "Please enter a title";
-      return;
-    } 
+    /**
+     * ============================================
+     * LIFECYCLE HOOK - OnInit
+     * ============================================
+     * Called after Angular initializes the component.
+     * Good place to fetch initial data.
+     */
+    ngOnInit(): void {
+        this.getTodosList();
+    }
 
-    this._filteredTodos = this.filterItems(this._downloadedTodos, title);
-  }
+    /**
+     * ============================================
+     * OBSERVABLE - HTTP CLIENT
+     * ============================================
+     * The service returns an Observable.
+     * We subscribe to handle the response.
+     * 
+     * Key differences from Promises:
+     * - Observable is lazy (doesn't execute until subscribed)
+     * - Observable can emit multiple values over time
+     * - Observable can be cancelled
+     */
+    getTodosList(): void {
+        this._isLoading = true;
+        
+        this._todoService.getTodos()
+            .subscribe({
+                next: (data: Todo[]) => {
+                    this._downloadedTodos = data;
+                    this.applyFilter();
+                    this._isLoading = false;
+                },
+                error: (error: unknown) => {
+                    console.error('Error fetching todos:', error);
+                    this._message = 'Error loading todos';
+                    this._isLoading = false;
+                }
+            });
+    }
 
-  // Getting todos list
-  getTodosList() {
-  this._todoService.getTodos()
-    .subscribe({
-      next: data => {
-        console.log(data);
-        this._downloadedTodos = data;
-        this._filteredTodos = this._downloadedTodos;
-      }, 
-      error: error => {
-        console.log(error);
-      }
-    })
-  }
-  
-  //Filter array items based on search criteria (query)
-  filterItems(arr : Todo[], query : string) {
-    return arr.filter(function(item) {
-      return item.title.toLowerCase().indexOf(query.toLowerCase()) !== -1
-    })
-  }
-
-  onView(id: string) {
-    console.log("onView " + id);
-    this._router.navigate(['/elements/' + id]);
-  }
-
-  onEdit(todo: Todo) {
-    console.log("onEdit " + todo);
-    this._router.navigate(['/elements/new', todo.id]);
-  }
-
-  onDelete(id: string ) {
-    console.log("onDelete " + id);
-    this._todoService.deleteTodo(id)
-      .subscribe({
-        next: data => {
-          console.log(data);
-          this.getTodosList();
-        },
-        error: error => {
-          console.log(error);
+    /**
+     * ============================================
+     * EVENT BINDING - Form Submission
+     * ============================================
+     * Called when form is submitted via (ngSubmit).
+     */
+    onSubmit(): void {
+        const title = this._form.get('title')?.value;
+        if (title === null || title === '') {
+            this._message = 'Please enter a title';
+            return;
         }
-      })
-    this._router.navigate(['/elements']);
-  }
+        this.applyFilter();
+    }
 
+    /**
+     * ============================================
+     * FUNCTIONAL PROGRAMMING
+     * ============================================
+     * Filter function using array filter method.
+     * Demonstrates functional programming with arrow functions.
+     */
+    onFilterStatusChange(status: string): void {
+        this._filterStatus = status;
+        this.applyFilter();
+    }
+
+    /**
+     * ============================================
+     * APPLY CUSTOM PIPE
+     * ============================================
+     * Uses the custom FilterTodoPipe to transform data.
+     * In the template, this is done automatically:
+     * {{ todos | filterTodo:filterStatus:searchText }}
+     */
+    applyFilter(): void {
+        const searchText = this._form.get('title')?.value || '';
+        this._filteredTodos = this._downloadedTodos.filter(todo => {
+            let matchesStatus = true;
+            let matchesSearch = true;
+
+            if (this._filterStatus === 'completed') {
+                matchesStatus = todo.completed;
+            } else if (this._filterStatus === 'pending') {
+                matchesStatus = !todo.completed;
+            }
+
+            if (searchText) {
+                matchesSearch = todo.title.toLowerCase().includes(searchText.toLowerCase());
+            }
+
+            return matchesStatus && matchesSearch;
+        });
+    }
+
+    /**
+     * ============================================
+     * OUTPUT EVENTS - Handle child component events
+     * ============================================
+     * These methods handle events emitted by TodoItemComponent.
+     * The child component emits events, parent handles them.
+     */
+    onView(id: string): void {
+        this._router.navigate(['/elements/' + id]);
+    }
+
+    onEdit(todo: Todo): void {
+        this._router.navigate(['/elements/new', todo.id]);
+    }
+
+    onDelete(id: string): void {
+        this._todoService.deleteTodo(id)
+            .subscribe({
+                next: () => {
+                    this.getTodosList();
+                },
+                error: (error: unknown) => {
+                    console.error('Error deleting todo:', error);
+                }
+            });
+    }
 }

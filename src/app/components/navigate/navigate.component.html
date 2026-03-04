@@ -1,11 +1,22 @@
+<!-- ============================================ -->
+<!-- ROUTING - Navigation Component               -->
+<!-- ============================================ -->
+<!-- 
+     This component demonstrates Angular Router:
+     - routerLink: Property binding for navigation URLs
+     - routerLinkActive: Applies class when route is active
+-->
+
 <ul>
     <li>
+        <!-- ROUTER LINK - Property binding for navigation -->
+        <!-- routerLinkActive applies 'active' class when on this route -->
         <a routerLink="/elements" routerLinkActive="active">My Collections</a>
     </li>
     <li>
         <a routerLink="/elements/new" routerLinkActive="active">New element</a>
     </li>
     <li style="float:right">
-        <a routerLink="/elements" >About</a>
+        <a routerLink="/elements">About</a>
     </li>
 </ul>

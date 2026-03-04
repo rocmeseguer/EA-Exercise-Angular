@@ -1,43 +1,80 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 
-import { Todo } from '../../models/todo';
+import { Todo, createTodo } from '../../models/todo';
 import { TodoService } from '../../services/todo-service.service';
 
+/**
+ * ============================================
+ * COMPONENT - Element Detail View
+ * ============================================
+ * This component demonstrates:
+ * - Route parameter handling
+ * - Observable for async data
+ * - Property binding for dynamic styling
+ * - Interpolación for displaying data
+ */
 @Component({
-  selector: 'app-element',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './element.component.html',
-  styleUrls: ['./element.component.css']
+    selector: 'app-element',
+    standalone: true,
+    imports: [CommonModule],
+    templateUrl: './element.component.html',
+    styleUrls: ['./element.component.css']
 })
+export class ElementComponent implements OnInit {
 
-export class ElementComponent {
+    /**
+     * ============================================
+     * TYPESCRIPT - TYPE DEFINITIONS
+     * ============================================
+     * Using createTodo factory function for initialization.
+     */
+    _todo: Todo = createTodo();
+    today: Date = new Date();
+    private _id: string = '';
 
-  _todo: Todo = new Todo();
-  private _id: string = "";
+    /**
+     * ============================================
+     * DEPENDENCY INJECTION
+     * ============================================
+     */
+    constructor(
+        private _route: ActivatedRoute,
+        private _todoService: TodoService
+    ) { }
 
-  constructor(
-    private _route: ActivatedRoute, // Para optener el parametro de la URL
-    private _todoService: TodoService
-  ) { }
+    /**
+     * ============================================
+     * LIFECYCLE HOOK - OnInit
+     * ============================================
+     * Gets route parameter and fetches todo data.
+     */
+    ngOnInit(): void {
+        this._id = this._route.snapshot.paramMap.get('id') || '';
+        console.log('ElementComponent ' + this._id);
+        
+        if (this._id) {
+            this.getTodo(this._id);
+        }
+    }
 
-  ngOnInit(): void {
-    // Obtener el parámetro de la URL
-    this._id = this._route.snapshot.paramMap.get('id') || "";
-    console.log("ElementComponent " + this._id);
-    this.getTodo(this._id);
-  }
-
-    // Getting todo
-    getTodo(id: string) { 
-      this._todoService.getTodo(id)
-        .subscribe({
-          next: data => {
-            console.log(data);
-            this._todo = data;
-          }
-        })
-    } 
+    /**
+     * ============================================
+     * OBSERVABLE - Fetch single todo
+     * ============================================
+     * Demonstrates handling Observable response.
+     */
+    getTodo(id: string): void {
+        this._todoService.getTodo(id)
+            .subscribe({
+                next: (data: Todo) => {
+                    console.log(data);
+                    this._todo = data;
+                },
+                error: (error: unknown) => {
+                    console.error('Error fetching todo:', error);
+                }
+            });
+    }
 }

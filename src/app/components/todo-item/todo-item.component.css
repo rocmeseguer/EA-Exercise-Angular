@@ -1,0 +1,19 @@
+/* ============================================ */
+/* COMPONENT STYLES - SCOPED TO COMPONENT        */
+/* ============================================ */
+
+.completed {
+    color: green;
+    font-weight: bold;
+}
+
+.pending {
+    color: orange;
+    font-weight: bold;
+}
+
+button {
+    margin: 2px;
+    padding: 4px 8px;
+    cursor: pointer;
+}

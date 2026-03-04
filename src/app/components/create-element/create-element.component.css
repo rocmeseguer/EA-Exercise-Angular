@@ -57,4 +57,16 @@
   button:disabled {
     background-color: #ccc;
   }
+
+  /* Error styles for validation */
+  .error-message {
+    color: red;
+    font-size: 12px;
+    font-weight: normal;
+    margin-top: -5px;
+  }
+
+  input.error {
+    border-color: red;
+  }
   

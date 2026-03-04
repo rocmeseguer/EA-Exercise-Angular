@@ -1,27 +1,89 @@
 <div class="item-card">
-    <h3>New Element</h3>
+    <h3>
+        <!-- INTERPOLATION - Display conditional text -->
+        {{ _todoId ? 'Edit Element' : 'New Element' }}
+    </h3>
+
+    <!-- ============================================ -->
+    <!-- REACTIVE FORMS - Property & Event Binding -->
+    <!-- ============================================ -->
+
+    <!-- PROPERTY BINDING: [formGroup] binds the FormGroup -->
+    <!-- EVENT BINDING: (ngSubmit) handles form submission -->
     <form [formGroup]="_form" (ngSubmit)="onSubmit()" class="todo-form">
+        
+        <!-- USER ID FIELD -->
         <label>
-          User ID:
-          <input type="text" formControlName="userId" required>
+            User ID:
+            <!-- PROPERTY BINDING: formControlName connects input to FormControl -->
+            <input type="text" formControlName="userId" required>
         </label>
-      
+
+        <!-- TODO ID FIELD -->
         <label>
-          Todo ID:
-          <input type="text" formControlName="id" required>
+            Todo ID:
+            <input type="text" formControlName="id" required>
         </label>
-      
+
+        <!-- TITLE FIELD with Validation Feedback -->
         <label>
-          Title:
-          <input type="text" formControlName="title" required>
+            Title:
+            <!-- PROPERTY BINDING: [class.error] applies class conditionally -->
+            <input type="text" formControlName="title" required
+                   [class.error]="title?.invalid && title?.touched">
         </label>
-      
+        
+        <!-- VALIDATION MESSAGE - *ngIf for conditional display -->
+        <div *ngIf="title?.invalid && title?.touched" class="error-message">
+            <!-- INTERPOLATION with pipe -->
+            Title must be at least {{ 3 }} characters
+        </div>
+
+        <!-- COMPLETED CHECKBOX - Property Binding -->
         <label>
-          Completed:
-          <input type="checkbox" formControlName="completed">
+            Completed:
+            <!-- PROPERTY BINDING: formControlName for checkbox -->
+            <input type="checkbox" formControlName="completed">
         </label>
+
+        <!-- ============================================ -->
+        <!-- TWO-WAY BINDING - [(ngModel)]                  -->
+        <!-- ============================================ -->
+        <!-- 
+             Two-way binding syntax: [(ngModel)]="property"
+             - Property binding []: component -> view
+             - Event binding (): view -> component
+             Together []() create two-way binding
+             
+             Changes in input update _description and vice versa.
+        -->
+        <label>
+            Description (Two-way binding demo):
+            <!-- TWO-WAY BINDING: [(ngModel)] syncs input with _description -->
+            <input type="text" [(ngModel)]="_description" name="description"
+                   placeholder="Type something...">
+        </label>
+
+        <!-- INTERPOLATION - Display the two-way bound value -->
+        <p *ngIf="_description">
+            <strong>Description preview:</strong> {{ _description }}
+        </p>
+
+        <!-- ============================================ -->
+        <!-- PROPERTY BINDING - [disabled]                -->
+        <!-- ============================================ -->
         <button type="submit" [disabled]="_form.invalid">
-            {{ _todoId ? 'Actualizar Todo' : 'Crear Todo' }}
-          </button>      
+            {{ _todoId ? 'Update Todo' : 'Create Todo' }}
+        </button>
     </form>
+
+    <!-- ============================================ -->
+    <!-- PIPES - Built-in pipes                        -->
+    <!-- ============================================ -->
+    
+    <!-- UPPERCASE pipe - transforms text to uppercase -->
+    <p>Form title (uppercase): {{ _form.get('title')?.value | uppercase }}</p>
+    
+    <!-- JSON pipe - useful for debugging (shows object as JSON string) -->
+    <p>Form value (json): {{ _form.value | json }}</p>
 </div>

@@ -1,21 +1,72 @@
-<p></p>
+<!-- ============================================ -->
+<!-- DIRECTIVES STRUCTURALS - *ngIf -->
+<!-- ============================================ -->
 
+<!-- *ngIf: Conditional rendering -->
+<!-- Shows loading message when data is being fetched -->
+<div *ngIf="_isLoading">
+    <p>Loading...</p>
+</div>
+
+<!-- *ngIf with else: Shows message when no data -->
+<div *ngIf="!_isLoading && _filteredTodos.length === 0">
+    <p>No todos found</p>
+</div>
+
+<!-- Shows error message if exists -->
+<div *ngIf="_message && !_isLoading">
+    <p>{{ _message }}</p>
+</div>
+
+<!-- ============================================ -->
+<!-- REACTIVE FORMS - Property & Event Binding -->
+<!-- ============================================ -->
+
+<!-- PROPERTY BINDING: [formGroup] binds FormGroup to form element -->
+<!-- EVENT BINDING: (ngSubmit) binds form submission event -->
 <form [formGroup]="_form" (ngSubmit)="onSubmit()">
-    <input type="text" formControlName="title">
-    <input type="submit" value="Filter">
+    <!-- INPUT: Text field for search -->
+    <input type="text" formControlName="title" placeholder="Search todos...">
+    
+    <!-- PROPERTY BINDING: [disabled] - button disabled when form is invalid -->
+    <input type="submit" value="Filter" [disabled]="_form.invalid">
 </form>
 
-<p></p>
+<!-- Filter status buttons -->
+<div class="filter-buttons">
+    <!-- EVENT BINDING: (click) triggers method -->
+    <button (click)="onFilterStatusChange('all')">All</button>
+    <button (click)="onFilterStatusChange('completed')">Completed</button>
+    <button (click)="onFilterStatusChange('pending')">Pending</button>
+</div>
 
-<table class="table table-sm table-hover">
+<!-- ============================================ -->
+<!-- DIRECTIVES STRUCTURALS - *ngFor -->
+<!-- ============================================ -->
+
+<!-- *ngFor: Iterates over array to create repeated elements -->
+<!-- Each todo becomes a TodoItemComponent with @Input/@Output -->
+<table class="table table-sm table-hover" *ngIf="!_isLoading && _filteredTodos.length > 0">
     <tbody>
-      <tr *ngFor="let todo of _filteredTodos">
-        <td>{{todo.title}}</td>
-        <td>
-            <button (click)="onView(todo.id)">View</button>
-            <button (click)="onEdit(todo)">Edit</button>
-            <button (click)="onDelete(todo.id)">Delete</button>
-        </td>
-      </tr>
+        <!-- COMPONENT ARCHITECTURE: Using child component -->
+        <!-- @Input() todo: passes each todo to child component -->
+        <!-- @Output() view/edit/delete: receives events from child -->
+        <tr *ngFor="let todo of _filteredTodos">
+            <app-todo-item 
+                [todo]="todo"
+                (view)="onView($event)"
+                (edit)="onEdit($event)"
+                (delete)="onDelete($event)">
+            </app-todo-item>
+        </tr>
     </tbody>
-  </table>
+</table>
+
+<!-- ============================================ -->
+<!-- INTERPOLATION - Logic to View -->
+<!-- ============================================ -->
+
+<!-- Display count of todos using interpolation -->
+<p *ngIf="!_isLoading">
+    Total: {{ _filteredTodos.length }} todos
+</p>

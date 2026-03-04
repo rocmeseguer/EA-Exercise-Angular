@@ -1,0 +1,29 @@
+<!-- ============================================ -->
+<!-- DATA BINDING EXAMPLES IN THIS TEMPLATE -->
+<!-- ============================================ -->
+
+<!-- INTERPOLATION - Logic to View -->
+<!-- Displays the todo title in uppercase using the built-in 'uppercase' pipe -->
+<td>{{ todo.title | uppercase }}</td>
+
+<!-- PROPERTY BINDING - Logic to View -->
+<!-- The class attribute is bound conditionally based on todo.completed -->
+<td>
+    <span [class.completed]="todo.completed" [class.pending]="!todo.completed">
+        <!-- INTERPOLATION - Displaying computed values -->
+        {{ todo.completed ? '✔ Completado' : '⏳ Pendiente' }}
+    </span>
+</td>
+
+<!-- EVENT BINDING - User action triggers method -->
+<!-- (click) binds the click event to the component's method -->
+<td>
+    <!-- VIEW BUTTON -->
+    <button (click)="onView()">View</button>
+    
+    <!-- EDIT BUTTON -->
+    <button (click)="onEdit()">Edit</button>
+    
+    <!-- DELETE BUTTON -->
+    <button (click)="onDelete()">Delete</button>
+</td>
