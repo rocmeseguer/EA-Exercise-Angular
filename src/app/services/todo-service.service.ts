@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 
-import { Todo, createTodo, generateMongoId } from '../models/todo';
+import { Todo, createTodo } from '../models/todo';
+import { generateMongoId } from '../utils/mongo-id'
 
 /**
  * ============================================

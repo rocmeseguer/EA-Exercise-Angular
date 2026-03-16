@@ -70,25 +70,41 @@ export class CreateElementComponent implements OnInit {
      */
     _description: string = '';
 
-    /**
-     * ============================================
-     * DEPENDENCY INJECTION
-     * ============================================
-     */
+/**
+ * ============================================
+ * DEPENDENCY INJECTION
+ * ============================================
+ * ActivatedRoute: Permite acceder a los parámetros de la URL.
+ * Esencial para el concepto de "Paso de datos en Routing".
+ */
     constructor(
         private _route: ActivatedRoute,
         private _todoService: TodoService
     ) { }
 
-    /**
+        /**
      * ============================================
      * LIFECYCLE HOOK - OnInit
      * ============================================
      */
     ngOnInit(): void {
-        this._todoId = this._route.snapshot.paramMap.get('id') || undefined;
-        if (this._todoId) {
-            this.loadTodo(this._todoId);
+        /**
+         * ============================================
+         * ROUTING - Lectura de datos por Navigation Extras
+         * ============================================
+         * history.state permite acceder a datos enviados via
+         * navigate(['/ruta'], { state: { data: todo } })
+         * No aparece en la URL, ideal para objetos complejos.
+         */
+        const navigation = history.state;
+        if (navigation && navigation.data) {
+            const todo: Todo = navigation.data;
+            this._form.setValue({
+                userId: todo.userId,
+                id: todo.id,
+                title: todo.title,
+                completed: todo.completed
+            });
         }
     }
 

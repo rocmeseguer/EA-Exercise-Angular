@@ -179,19 +179,32 @@ export class CollectionComponent implements OnInit {
         this._router.navigate(['/elements/' + id]);
     }
 
+/**
+ * ============================================
+ * ROUTING - Paso de datos en Routing (Navigation Extras)
+ * ============================================
+ * Se pasa el objeto Todo completo via Navigation Extras (state).
+ * No aparece en la URL, es más seguro para datos sensibles.
+ * Se recupera en el destino con: history.state
+ */
     onEdit(todo: Todo): void {
-        this._router.navigate(['/elements/new', todo.id]);
+        this._router.navigate(['/elements/new'], {
+            state: { data: todo }
+        });
     }
-
     onDelete(id: string): void {
-        this._todoService.deleteTodo(id)
-            .subscribe({
-                next: () => {
-                    this.getTodosList();
-                },
-                error: (error: unknown) => {
-                    console.error('Error deleting todo:', error);
-                }
-            });
+        const confirmed = window.confirm('Estàs segur que vols eliminar aquesta tasca? Aquesta acció no es pot desfer.');
+
+        if (confirmed) {
+            this._todoService.deleteTodo(id)
+                .subscribe({
+                    next: () => {
+                        this.getTodosList();
+                    },
+                    error: (error: unknown) => {
+                        console.error('Error deleting todo:', error);
+                    }
+                });
+        }
     }
 }

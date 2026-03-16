@@ -9,12 +9,16 @@ export const routes: Routes = [
     path: 'elements',
     component: CollectionComponent
   },
+  /**
+ * ============================================
+ * ROUTING - Paso de datos en Routing
+ * ============================================
+ * Los datos se pasan via Navigation Extras (state), no por URL.
+ * Esto permite pasar objetos completos sin exponerlos en la ruta.
+ * En el destino se accede con: history.state.data
+ */
   {
     path: 'elements/new',
-    component: CreateElementComponent
-  },
-  {
-    path: 'elements/new/:id',
     component: CreateElementComponent
   },
   {
