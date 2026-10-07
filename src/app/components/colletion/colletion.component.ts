@@ -1,35 +1,49 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 import { Todo } from '../../models/todo';
 import { TodoService } from '../../services/todo-service.service';
 import { TodoItemComponent } from '../todo-item/todo-item.component';
-import { FilterTodoPipe } from '../../pipes/filter-todo.pipe';
+import { TodoFilterType, filterTodos } from '../../pipes/filter-todo.pipe';
 
 /**
  * ============================================
  * COMPONENT ARCHITECTURE - STANDALONE COMPONENT
  * ============================================
  * This is a standalone component (no NgModule needed).
+ * Since Angular 19 'standalone: true' is the default.
  * It demonstrates:
- * - Parent-child component communication with Input/Output
+ * - Parent-child component communication with input()/output()
  * - Reactive Forms for user input
  * - Observable pattern for async data
- * - Custom pipes for data transformation
+ * - Signals & computed() for derived state
+ * - Built-in control flow (@if, @for)
+ * - Angular Material components (form field, toggles, list, progress bar)
  */
 @Component({
     selector: 'app-colletion',
-    standalone: true,
     imports: [
-        CommonModule, 
         ReactiveFormsModule,
         TodoItemComponent,
-        FilterTodoPipe
+        // Angular Material: import only the components used in the template
+        MatFormFieldModule,
+        MatInputModule,
+        MatButtonModule,
+        MatButtonToggleModule,
+        MatIconModule,
+        MatListModule,
+        MatProgressBarModule
     ],
     templateUrl: './colletion.component.html',
-    styleUrls: ['./colletion.component.css']
+    styleUrl: './colletion.component.css'
 })
 export class CollectionComponent implements OnInit {
 
@@ -39,38 +53,56 @@ export class CollectionComponent implements OnInit {
      * ============================================
      * FormGroup manages the form state and validation.
      * FormControl manages individual form fields.
+     *
+     * TYPED FORMS: { nonNullable: true } makes the value type 'string'
+     * (not 'string | null') and reset() returns '' instead of null.
      */
-    _form = new FormGroup({
-        title: new FormControl('')
+    protected readonly form = new FormGroup({
+        title: new FormControl('', { nonNullable: true })
     });
 
     /**
      * ============================================
-     * TYPESCRIPT - TYPE DEFINITIONS
+     * SIGNALS - Component state
      * ============================================
+     * STYLE GUIDE (v20+): members used only by the template are
+     * 'protected' (visible to the template, hidden from other classes)
+     * and 'readonly' (the signal reference never changes, only its value).
      * All properties have explicit types.
-     * _downloadedTodos: raw data from API
-     * _filteredTodos: data after applying filters
-     * _isLoading: tracks loading state for *ngIf
-     * _filterStatus: current filter (all/completed/pending)
+     * downloadedTodos: raw data from API
+     * isLoading: tracks loading state for @if
+     * filterStatus: current filter (all/completed/pending)
+     * searchText: text applied when the form is submitted
      */
-    _filteredTodos: Todo[] = [];
-    _downloadedTodos: Todo[] = [];
-    _isLoading: boolean = false;
-    _filterStatus: string = 'all';
-    _message: string = '';
+    protected readonly downloadedTodos = signal<Todo[]>([]);
+    protected readonly isLoading = signal<boolean>(false);
+    protected readonly filterStatus = signal<TodoFilterType>('all');
+    protected readonly searchText = signal<string>('');
+    protected readonly message = signal<string>('');
 
     /**
      * ============================================
-     * DEPENDENCY INJECTION
+     * COMPUTED SIGNAL - Derived state
      * ============================================
-     * Services are injected via the constructor.
+     * computed() derives a value from other signals.
+     * It is recalculated automatically (and only) when
+     * downloadedTodos, filterStatus or searchText change.
+     * No need to call applyFilter() by hand anymore.
+     * Reuses the pure function of the custom pipe.
+     */
+    protected readonly filteredTodos = computed<Todo[]>(() =>
+        filterTodos(this.downloadedTodos(), this.filterStatus(), this.searchText())
+    );
+
+    /**
+     * ============================================
+     * DEPENDENCY INJECTION - inject()
+     * ============================================
+     * Services are injected with the inject() function.
      * Private properties are prefixed with underscore.
      */
-    constructor(
-        private _router: Router,
-        private _todoService: TodoService
-    ) { }
+    private readonly _router = inject(Router);
+    private readonly _todoService = inject(TodoService);
 
     /**
      * ============================================
@@ -89,26 +121,25 @@ export class CollectionComponent implements OnInit {
      * ============================================
      * The service returns an Observable.
      * We subscribe to handle the response.
-     * 
+     *
      * Key differences from Promises:
      * - Observable is lazy (doesn't execute until subscribed)
      * - Observable can emit multiple values over time
      * - Observable can be cancelled
      */
     getTodosList(): void {
-        this._isLoading = true;
-        
+        this.isLoading.set(true);
+
         this._todoService.getTodos()
             .subscribe({
                 next: (data: Todo[]) => {
-                    this._downloadedTodos = data;
-                    this.applyFilter();
-                    this._isLoading = false;
+                    this.downloadedTodos.set(data);
+                    this.isLoading.set(false);
                 },
                 error: (error: unknown) => {
                     console.error('Error fetching todos:', error);
-                    this._message = 'Error loading todos';
-                    this._isLoading = false;
+                    this.message.set('Error loading todos');
+                    this.isLoading.set(false);
                 }
             });
     }
@@ -120,52 +151,36 @@ export class CollectionComponent implements OnInit {
      * Called when form is submitted via (ngSubmit).
      */
     onSubmit(): void {
-        const title = this._form.get('title')?.value;
-        if (title === null || title === '') {
-            this._message = 'Please enter a title';
+        // TYPED FORMS: controls.title.value is typed as 'string'
+        const title = this.form.controls.title.value;
+        if (title === '') {
+            this.message.set('Please enter a title');
             return;
         }
+        this.message.set('');
         this.applyFilter();
     }
 
     /**
      * ============================================
-     * FUNCTIONAL PROGRAMMING
+     * SIGNALS - Updating state
      * ============================================
-     * Filter function using array filter method.
-     * Demonstrates functional programming with arrow functions.
+     * Changing a signal is enough: computed() updates the list.
      */
-    onFilterStatusChange(status: string): void {
-        this._filterStatus = status;
+    onFilterStatusChange(status: TodoFilterType): void {
+        this.filterStatus.set(status);
         this.applyFilter();
     }
 
     /**
      * ============================================
-     * APPLY CUSTOM PIPE
+     * APPLY FILTER
      * ============================================
-     * Uses the custom FilterTodoPipe to transform data.
-     * In the template, this is done automatically:
-     * {{ todos | filterTodo:filterStatus:searchText }}
+     * Copies the form search text into the searchText signal.
+     * The filteredTodos computed signal does the rest.
      */
     applyFilter(): void {
-        const searchText = this._form.get('title')?.value || '';
-        this._filteredTodos = this._downloadedTodos.filter(todo => {
-            let matchesStatus = true;
-            let matchesSearch = true;
-
-            if (this._filterStatus === 'completed') {
-                matchesStatus = todo.completed;
-            } else if (this._filterStatus === 'pending') {
-                matchesStatus = !todo.completed;
-            }
-
-            if (searchText) {
-                matchesSearch = todo.title.toLowerCase().includes(searchText.toLowerCase());
-            }
-
-            return matchesStatus && matchesSearch;
-        });
+        this.searchText.set(this.form.controls.title.value);
     }
 
     /**

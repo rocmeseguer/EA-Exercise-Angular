@@ -1,89 +1,119 @@
-<div class="item-card">
-    <h3>
-        <!-- INTERPOLATION - Display conditional text -->
-        {{ _todoId ? 'Edit Element' : 'New Element' }}
-    </h3>
+<mat-card appearance="outlined" class="item-card">
+    <mat-card-header>
+        <mat-card-title>
+            <!-- INTERPOLATION - Display conditional text -->
+            {{ todoId ? 'Edit Element' : 'New Element' }}
+        </mat-card-title>
+    </mat-card-header>
 
-    <!-- ============================================ -->
-    <!-- REACTIVE FORMS - Property & Event Binding -->
-    <!-- ============================================ -->
+    <mat-card-content>
+        <!-- ============================================ -->
+        <!-- REACTIVE FORMS - Property & Event Binding -->
+        <!-- ============================================ -->
 
-    <!-- PROPERTY BINDING: [formGroup] binds the FormGroup -->
-    <!-- EVENT BINDING: (ngSubmit) handles form submission -->
-    <form [formGroup]="_form" (ngSubmit)="onSubmit()" class="todo-form">
-        
-        <!-- USER ID FIELD -->
-        <label>
-            User ID:
-            <!-- PROPERTY BINDING: formControlName connects input to FormControl -->
-            <input type="text" formControlName="userId" required>
-        </label>
+        <!-- PROPERTY BINDING: [formGroup] binds the FormGroup -->
+        <!-- EVENT BINDING: (ngSubmit) handles form submission -->
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="todo-form">
 
-        <!-- TODO ID FIELD -->
-        <label>
-            Todo ID:
-            <input type="text" formControlName="id" required>
-        </label>
+            <!-- ============================================ -->
+            <!-- ANGULAR MATERIAL - mat-form-field + matInput -->
+            <!-- ============================================ -->
+            <!--
+                 mat-form-field wraps a native <input matInput>:
+                 - <mat-label>: floating label
+                 - <mat-error>: shown automatically when the control
+                   is invalid AND touched (no @if needed for that)
+                 - required marks the label with '*'
+            -->
 
-        <!-- TITLE FIELD with Validation Feedback -->
-        <label>
-            Title:
-            <!-- PROPERTY BINDING: [class.error] applies class conditionally -->
-            <input type="text" formControlName="title" required
-                   [class.error]="title?.invalid && title?.touched">
-        </label>
-        
-        <!-- VALIDATION MESSAGE - *ngIf for conditional display -->
-        <div *ngIf="title?.invalid && title?.touched" class="error-message">
-            <!-- INTERPOLATION with pipe -->
-            Title must be at least {{ 3 }} characters
+            <!-- USER ID FIELD -->
+            <mat-form-field appearance="outline">
+                <mat-label>User ID</mat-label>
+                <!-- formControlName connects input to FormControl -->
+                <input matInput type="text" formControlName="userId" required>
+                <mat-error>User ID is required</mat-error>
+            </mat-form-field>
+
+            <!-- TODO ID FIELD -->
+            <mat-form-field appearance="outline">
+                <mat-label>Todo ID</mat-label>
+                <input matInput type="text" formControlName="id" required>
+                <mat-error>Todo ID is required</mat-error>
+            </mat-form-field>
+
+            <!-- TITLE FIELD with Validation Feedback -->
+            <mat-form-field appearance="outline">
+                <mat-label>Title</mat-label>
+                <input matInput type="text" formControlName="title" required>
+
+                <!-- VALIDATION MESSAGES - @if chooses the message for each validator -->
+                <!-- TYPED FORMS: form.controls.title is typed, no get('title')?. needed -->
+                @if (form.controls.title.hasError('required')) {
+                    <mat-error>Title is required</mat-error>
+                } @else if (form.controls.title.hasError('minlength')) {
+                    <!-- INTERPOLATION: the validator error object has the required length -->
+                    <mat-error>
+                        Title must be at least
+                        {{ form.controls.title.getError('minlength').requiredLength }} characters
+                    </mat-error>
+                }
+            </mat-form-field>
+
+            <!-- COMPLETED CHECKBOX - Material checkbox with formControlName -->
+            <mat-checkbox formControlName="completed">Completed</mat-checkbox>
+
+            <!-- ============================================ -->
+            <!-- PROPERTY BINDING - [disabled]                -->
+            <!-- ============================================ -->
+            <div class="form-actions">
+                <button matButton="filled" type="submit" [disabled]="form.invalid">
+                    {{ todoId ? 'Update Todo' : 'Create Todo' }}
+                </button>
+            </div>
+        </form>
+
+        <!-- ============================================ -->
+        <!-- TWO-WAY BINDING - [( )] with model()         -->
+        <!-- ============================================ -->
+        <!--
+             Two-way binding syntax: [(value)]="signal"
+             - Property binding []: parent -> child
+             - Event binding ():    child -> parent (valueChange)
+             Together [()] create two-way binding ("banana in a box").
+
+             The child declares: value = model<string>('')
+             Typing in the child updates the description signal of this
+             component, and changing description (Clear button)
+             updates the child input. No FormsModule needed.
+
+             It is placed OUTSIDE the reactive <form> on purpose:
+             it is not part of the Todo data sent to the API.
+        -->
+        <div class="two-way-demo">
+            <app-description-input [(value)]="description" />
+
+            <!-- INTERPOLATION - Display the two-way bound value -->
+            @if (description()) {
+                <p>
+                    <strong>Description preview:</strong> {{ description() }}
+                </p>
+                <!-- Parent -> child: changing the signal clears the child input -->
+                <div>
+                    <button matButton="outlined" type="button" (click)="description.set('')">
+                        Clear description
+                    </button>
+                </div>
+            }
         </div>
 
-        <!-- COMPLETED CHECKBOX - Property Binding -->
-        <label>
-            Completed:
-            <!-- PROPERTY BINDING: formControlName for checkbox -->
-            <input type="checkbox" formControlName="completed">
-        </label>
-
         <!-- ============================================ -->
-        <!-- TWO-WAY BINDING - [(ngModel)]                  -->
+        <!-- PIPES - Built-in pipes                        -->
         <!-- ============================================ -->
-        <!-- 
-             Two-way binding syntax: [(ngModel)]="property"
-             - Property binding []: component -> view
-             - Event binding (): view -> component
-             Together []() create two-way binding
-             
-             Changes in input update _description and vice versa.
-        -->
-        <label>
-            Description (Two-way binding demo):
-            <!-- TWO-WAY BINDING: [(ngModel)] syncs input with _description -->
-            <input type="text" [(ngModel)]="_description" name="description"
-                   placeholder="Type something...">
-        </label>
 
-        <!-- INTERPOLATION - Display the two-way bound value -->
-        <p *ngIf="_description">
-            <strong>Description preview:</strong> {{ _description }}
-        </p>
+        <!-- UPPERCASE pipe - transforms text to uppercase -->
+        <p class="debug">Form title (uppercase): {{ form.controls.title.value | uppercase }}</p>
 
-        <!-- ============================================ -->
-        <!-- PROPERTY BINDING - [disabled]                -->
-        <!-- ============================================ -->
-        <button type="submit" [disabled]="_form.invalid">
-            {{ _todoId ? 'Update Todo' : 'Create Todo' }}
-        </button>
-    </form>
-
-    <!-- ============================================ -->
-    <!-- PIPES - Built-in pipes                        -->
-    <!-- ============================================ -->
-    
-    <!-- UPPERCASE pipe - transforms text to uppercase -->
-    <p>Form title (uppercase): {{ _form.get('title')?.value | uppercase }}</p>
-    
-    <!-- JSON pipe - useful for debugging (shows object as JSON string) -->
-    <p>Form value (json): {{ _form.value | json }}</p>
-</div>
+        <!-- JSON pipe - useful for debugging (shows object as JSON string) -->
+        <p class="debug">Form value (json): {{ form.value | json }}</p>
+    </mat-card-content>
+</mat-card>

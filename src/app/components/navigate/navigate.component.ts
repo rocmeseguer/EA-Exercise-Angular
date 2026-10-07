@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 /**
  * ============================================
@@ -9,13 +11,27 @@ import { RouterModule } from '@angular/router';
  * Demonstrates Angular Router with:
  * - routerLink for navigation
  * - routerLinkActive for active route styling
+ *
+ * Only the directives that are used are imported
+ * (instead of the whole RouterModule).
+ *
+ * ============================================
+ * ANGULAR MATERIAL
+ * ============================================
+ * Each Material component is imported where it is used,
+ * like any other standalone component/directive.
  */
 @Component({
     selector: 'app-navigate',
-    standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [
+        RouterLink,
+        RouterLinkActive,
+        MatToolbarModule,
+        MatButtonModule,
+        MatIconModule
+    ],
     templateUrl: './navigate.component.html',
-    styleUrls: ['./navigate.component.css']
+    styleUrl: './navigate.component.scss'
 })
 export class NavigateComponent {
 }

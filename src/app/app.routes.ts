@@ -1,13 +1,20 @@
 import { Routes } from '@angular/router';
 
-import { CollectionComponent } from './components/colletion/colletion.component'; 
-import { ElementComponent } from './components/element/element.component';
-import { CreateElementComponent } from './components/create-element/create-element.component';
-
+/**
+ * ============================================
+ * ROUTING - Lazy loading with loadComponent
+ * ============================================
+ * loadComponent: () => import(...) loads the component (and the
+ * Angular Material modules it uses) in a separate JavaScript chunk,
+ * only when the user navigates to that route.
+ * The initial bundle is smaller and the app starts faster.
+ * There are no static imports of the components in this file.
+ */
 export const routes: Routes = [
   {
     path: 'elements',
-    component: CollectionComponent
+    loadComponent: () => import('./components/colletion/colletion.component')
+      .then(m => m.CollectionComponent)
   },
   /**
  * ============================================
@@ -19,11 +26,17 @@ export const routes: Routes = [
  */
   {
     path: 'elements/new',
-    component: CreateElementComponent
+    loadComponent: () => import('./components/create-element/create-element.component')
+      .then(m => m.CreateElementComponent)
   },
+  /**
+   * ':id' is received in ElementComponent as: id = input.required<string>()
+   * thanks to withComponentInputBinding() in app.config.ts
+   */
   {
     path: 'elements/:id',
-    component: ElementComponent
+    loadComponent: () => import('./components/element/element.component')
+      .then(m => m.ElementComponent)
   },
   {
     path: '',

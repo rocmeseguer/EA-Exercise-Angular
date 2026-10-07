@@ -1,0 +1,9 @@
+/* Layout only: colors, fonts and shapes come from Angular Material */
+
+:host {
+  display: block;
+}
+
+mat-form-field {
+  width: 100%;
+}

@@ -1,16 +1,20 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { JsonPipe, UpperCasePipe } from '@angular/common';
 import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
 
 /**
  * ============================================
- * FORMS MODULE - For Two-way Binding
+ * CHILD COMPONENT - For Two-way Binding
  * ============================================
- * FormsModule provides ngModel directive for two-way binding.
- * We import it in the imports array.
+ * DescriptionInputComponent exposes a model() signal,
+ * so we can bind it with [(value)].
  */
-import { FormsModule } from '@angular/forms';
+import { DescriptionInputComponent } from '../description-input/description-input.component';
 
 import { Todo, createTodo } from '../../models/todo';
 import { TodoService } from '../../services/todo-service.service';
@@ -21,19 +25,26 @@ import { TodoService } from '../../services/todo-service.service';
  * ============================================
  * This component demonstrates:
  * - Reactive Forms with validators
- * - Two-way binding with [(ngModel)]
+ * - Two-way binding between components with model() and [( )]
  * - Observable handling in HTTP calls
+ * - Angular Material form controls (mat-form-field, matInput, mat-checkbox)
  */
 @Component({
     selector: 'app-create-element',
-    standalone: true,
     imports: [
-        ReactiveFormsModule, 
-        CommonModule,
-        FormsModule  // Required for [(ngModel)] two-way binding
+        ReactiveFormsModule,
+        DescriptionInputComponent,  // Child component with model() for [( )]
+        UpperCasePipe,
+        JsonPipe,
+        // Angular Material
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatCheckboxModule,
+        MatButtonModule
     ],
     templateUrl: './create-element.component.html',
-    styleUrls: ['./create-element.component.css']
+    styleUrl: './create-element.component.css'
 })
 export class CreateElementComponent implements OnInit {
 
@@ -42,8 +53,11 @@ export class CreateElementComponent implements OnInit {
      * TYPESCRIPT - OPTIONAL PROPERTIES
      * ============================================
      * Optional properties marked with '?'
+     *
+     * STYLE GUIDE (v20+): members used only by the template are
+     * 'protected' (visible to the template, hidden from other classes).
      */
-    _todoId?: string;
+    protected todoId?: string;
 
     /**
      * ============================================
@@ -52,37 +66,37 @@ export class CreateElementComponent implements OnInit {
      * FormGroup manages the entire form state.
      * FormControl handles each input field.
      * Validators provide validation rules.
+     *
+     * TYPED FORMS: { nonNullable: true } makes each value type exact
+     * ('string', 'boolean' instead of 'string | null', ...) and
+     * reset() goes back to the initial value instead of null.
      */
-    _form = new FormGroup({
-        userId: new FormControl('', Validators.required),
-        id: new FormControl('', Validators.required),
-        title: new FormControl('', [Validators.required, Validators.minLength(3)]),
-        completed: new FormControl(false)
+    protected readonly form = new FormGroup({
+        userId: new FormControl('', { nonNullable: true, validators: Validators.required }),
+        id: new FormControl('', { nonNullable: true, validators: Validators.required }),
+        title: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3)] }),
+        completed: new FormControl(false, { nonNullable: true })
     });
 
     /**
      * ============================================
      * TWO-WAY BINDING - Additional field
      * ============================================
-     * This field demonstrates two-way binding with [(ngModel)].
-     * Changes in the input update the property and vice versa.
+     * This signal demonstrates two-way binding with a child component:
+     *   <app-description-input [(value)]="description" />
+     * Changes in the child input update this signal and vice versa.
      * This is separate from the Reactive Form.
      */
-    _description: string = '';
+    protected readonly description = signal<string>('');
 
-/**
- * ============================================
- * DEPENDENCY INJECTION
- * ============================================
- * ActivatedRoute: Permite acceder a los parámetros de la URL.
- * Esencial para el concepto de "Paso de datos en Routing".
- */
-    constructor(
-        private _route: ActivatedRoute,
-        private _todoService: TodoService
-    ) { }
+    /**
+     * ============================================
+     * DEPENDENCY INJECTION - inject()
+     * ============================================
+     */
+    private readonly _todoService = inject(TodoService);
 
-        /**
+    /**
      * ============================================
      * LIFECYCLE HOOK - OnInit
      * ============================================
@@ -99,7 +113,7 @@ export class CreateElementComponent implements OnInit {
         const navigation = history.state;
         if (navigation && navigation.data) {
             const todo: Todo = navigation.data;
-            this._form.setValue({
+            this.form.setValue({
                 userId: todo.userId,
                 id: todo.id,
                 title: todo.title,
@@ -119,7 +133,7 @@ export class CreateElementComponent implements OnInit {
             .subscribe({
                 next: (todo: Todo) => {
                     if (todo) {
-                        this._form.setValue({
+                        this.form.setValue({
                             userId: todo.userId,
                             id: todo.id,
                             title: todo.title,
@@ -140,11 +154,17 @@ export class CreateElementComponent implements OnInit {
      * Called when form is submitted.
      */
     onSubmit(): void {
-        if (this._form.valid) {
-            const todo: Todo = this._form.value as Todo;
+        if (this.form.valid) {
+            /**
+             * TYPED FORMS - getRawValue()
+             * Returns { userId: string, id: string, title: string, completed: boolean }
+             * which matches the Todo interface: no 'as Todo' cast needed.
+             * (form.value would be Partial<...> because disabled controls are excluded)
+             */
+            const todo: Todo = this.form.getRawValue();
             this.createTodo(todo);
-            this._form.reset();
-            this._description = '';  // Reset two-way bound field
+            this.form.reset();
+            this.description.set('');  // Reset two-way bound field
         }
     }
 
@@ -153,26 +173,14 @@ export class CreateElementComponent implements OnInit {
      * OBSERVABLE - Create new todo
      * ============================================
      * Sends data to API via Observable.
+     * Observables are lazy: without subscribe() the request is never sent.
      */
     createTodo(todo: Todo): void {
         this._todoService.createTodo(todo)
             .subscribe({
-                next: (data: Todo) => {
-                    console.log('Todo created:', data);
-                },
                 error: (error: unknown) => {
                     console.error('Error creating todo:', error);
                 }
             });
-    }
-
-    /**
-     * ============================================
-     * GETTER - For template access
-     * ============================================
-     * Provides convenient access to form controls.
-     */
-    get title() {
-        return this._form.get('title');
     }
 }

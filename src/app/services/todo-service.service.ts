@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 
@@ -32,8 +32,9 @@ export class TodoService {
      * DEPENDENCY INJECTION
      * ============================================
      * HttpClient is injected for making HTTP requests.
+     * Angular 21: inject() function instead of constructor injection.
      */
-    constructor(private _http: HttpClient) { }
+    private readonly _http = inject(HttpClient);
 
     /**
      * ============================================

@@ -1,1 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* ============================================ */
+/* GLOBAL LAYOUT                                */
+/* ============================================ */
+/* Theme colors and fonts come from material-theme.scss */
+
+.content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+}

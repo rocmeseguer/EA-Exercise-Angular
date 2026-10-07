@@ -1,26 +1,42 @@
 <!-- ============================================ -->
 <!-- DATA BINDING EXAMPLES IN THIS TEMPLATE       -->
 <!-- ============================================ -->
+<!--
+     ANGULAR MATERIAL - <mat-card>
+     - <mat-card-header>: title and subtitle
+     - <mat-card-content>: main content
+     - <mat-card-footer>: bottom area
+-->
 
-<div class="item-card">
-    <!-- INTERPOLATION - Logic to View -->
-    <!-- {{ }} displays component properties in the template -->
-    <h3>{{ _todo.title | uppercase }}</h3>
-    
-    <!-- INTERPOLATION - Displaying computed values -->
-    <p><strong>ID:</strong> {{ _todo.id }}</p>
-    <p><strong>Usuario:</strong> {{ _todo.userId ? _todo.userId : 'No asignado' }}</p>
-    
-    <p><strong>Estado:</strong> 
+<mat-card appearance="outlined" class="item-card">
+    <mat-card-header>
         <!-- PROPERTY BINDING - Logic to View -->
-        <!-- [class.completed] applies CSS class conditionally -->
-        <!-- [class.pending] applies CSS class when todo is not completed -->
-        <span [class.completed]="_todo.completed" [class.pending]="!_todo.completed">
-            <!-- INTERPOLATION - Ternary operator in template -->
-            {{ _todo.completed ? '✔ Completado' : '⏳ Pendiente' }}
-        </span>
-    </p>
+        <!-- [class.completed] / [class.pending] apply CSS classes conditionally -->
+        <mat-icon mat-card-avatar
+                  [class.completed]="todo().completed"
+                  [class.pending]="!todo().completed">
+            {{ todo().completed ? 'check_circle' : 'schedule' }}
+        </mat-icon>
 
-    <!-- INTERPOLATION - Using date pipe -->
-    <p><strong>Last Updated:</strong> {{ today | date:'short' }}</p>
-</div>
+        <!-- INTERPOLATION - Logic to View -->
+        <!-- {{ }} displays component properties in the template -->
+        <mat-card-title>{{ todo().title | uppercase }}</mat-card-title>
+
+        <!-- INTERPOLATION - Displaying computed values -->
+        <mat-card-subtitle>ID: {{ todo().id }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+        <p><strong>Usuario:</strong> {{ todo().userId ? todo().userId : 'No asignado' }}</p>
+
+        <p><strong>Estado:</strong>
+            <span [class.completed]="todo().completed" [class.pending]="!todo().completed">
+                <!-- INTERPOLATION - Ternary operator in template -->
+                {{ todo().completed ? 'Completado' : 'Pendiente' }}
+            </span>
+        </p>
+
+        <!-- INTERPOLATION - Using date pipe -->
+        <p><strong>Last Updated:</strong> {{ today | date:'short' }}</p>
+    </mat-card-content>
+</mat-card>

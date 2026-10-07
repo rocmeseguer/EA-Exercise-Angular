@@ -1,8 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { Component, inject, input } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { DatePipe, UpperCasePipe } from '@angular/common';
+import { catchError, of, switchMap } from 'rxjs';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 
-import { Todo, createTodo } from '../../models/todo';
+import { createTodo } from '../../models/todo';
 import { TodoService } from '../../services/todo-service.service';
 
 /**
@@ -10,71 +13,69 @@ import { TodoService } from '../../services/todo-service.service';
  * COMPONENT - Element Detail View
  * ============================================
  * This component demonstrates:
- * - Route parameter handling
- * - Observable for async data
+ * - Route parameters as component inputs
+ * - Observable -> Signal conversion (toObservable / toSignal)
+ * - RxJS operators: switchMap, catchError
  * - Property binding for dynamic styling
  * - Interpolación for displaying data
+ * - Angular Material card (mat-card)
  */
 @Component({
     selector: 'app-element',
-    standalone: true,
-    imports: [CommonModule],
+    imports: [UpperCasePipe, DatePipe, MatCardModule, MatIconModule],
     templateUrl: './element.component.html',
-    styleUrls: ['./element.component.css']
+    styleUrl: './element.component.css'
 })
-export class ElementComponent implements OnInit {
+export class ElementComponent {
 
     /**
      * ============================================
-     * TYPESCRIPT - TYPE DEFINITIONS
+     * ROUTING - Route parameter as input()
      * ============================================
-     * Using createTodo factory function for initialization.
+     * Route: { path: 'elements/:id', component: ElementComponent }
+     * With provideRouter(routes, withComponentInputBinding()) (app.config.ts)
+     * the router sets the ':id' parameter into the input with the same name.
+     *
+     * No ActivatedRoute, no snapshot, no ngOnInit.
+     * And it is reactive: navigating from /elements/1 to /elements/2
+     * reuses this component and only updates the id() signal.
      */
-    _todo: Todo = createTodo();
-    today: Date = new Date();
-    private _id: string = '';
+    readonly id = input.required<string>();
 
     /**
      * ============================================
-     * DEPENDENCY INJECTION
+     * DEPENDENCY INJECTION - inject()
      * ============================================
      */
-    constructor(
-        private _route: ActivatedRoute,
-        private _todoService: TodoService
-    ) { }
+    private readonly _todoService = inject(TodoService);
 
     /**
      * ============================================
-     * LIFECYCLE HOOK - OnInit
+     * SIGNALS + OBSERVABLES - Reactive data loading
      * ============================================
-     * Gets route parameter and fetches todo data.
+     * 1. toObservable(this.id): emits every time the id signal changes
+     * 2. switchMap: for each id, call the API. If the id changes before
+     *    the response arrives, the previous request is cancelled.
+     * 3. catchError: on HTTP error, log it and emit an empty Todo
+     * 4. toSignal: converts the result back to a signal for the template
+     *    (it subscribes and unsubscribes automatically).
+     * Using createTodo factory function for the initial value.
+     *
+     * STYLE GUIDE (v20+): members used only by the template are
+     * 'protected' (visible to the template, hidden from other classes)
+     * and 'readonly' (the reference never changes).
      */
-    ngOnInit(): void {
-        this._id = this._route.snapshot.paramMap.get('id') || '';
-        console.log('ElementComponent ' + this._id);
-        
-        if (this._id) {
-            this.getTodo(this._id);
-        }
-    }
-
-    /**
-     * ============================================
-     * OBSERVABLE - Fetch single todo
-     * ============================================
-     * Demonstrates handling Observable response.
-     */
-    getTodo(id: string): void {
-        this._todoService.getTodo(id)
-            .subscribe({
-                next: (data: Todo) => {
-                    console.log(data);
-                    this._todo = data;
-                },
-                error: (error: unknown) => {
+    protected readonly todo = toSignal(
+        toObservable(this.id).pipe(
+            switchMap((id: string) => this._todoService.getTodo(id).pipe(
+                catchError((error: unknown) => {
                     console.error('Error fetching todo:', error);
-                }
-            });
-    }
+                    return of(createTodo());
+                })
+            ))
+        ),
+        { initialValue: createTodo() }
+    );
+
+    protected readonly today: Date = new Date();
 }

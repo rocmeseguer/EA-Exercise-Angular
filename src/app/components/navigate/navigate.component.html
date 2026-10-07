@@ -1,22 +1,48 @@
 <!-- ============================================ -->
 <!-- ROUTING - Navigation Component               -->
 <!-- ============================================ -->
-<!-- 
+<!--
      This component demonstrates Angular Router:
      - routerLink: Property binding for navigation URLs
      - routerLinkActive: Applies class when route is active
+
+     And Angular Material components:
+     - <mat-toolbar>: the navigation bar
+     - matButton:     Material text buttons (hover/focus/ripple included)
+     - <mat-icon>:    Material Icons font
 -->
 
-<ul>
-    <li>
-        <!-- ROUTER LINK - Property binding for navigation -->
-        <!-- routerLinkActive applies 'active' class when on this route -->
-        <a routerLink="/elements" routerLinkActive="active">My Collections</a>
-    </li>
-    <li>
-        <a routerLink="/elements/new" routerLinkActive="active">New element</a>
-    </li>
-    <li style="float:right">
-        <a routerLink="/elements">About</a>
-    </li>
-</ul>
+<mat-toolbar class="navbar">
+    <!-- ============================================ -->
+    <!-- ROUTER LINK ACTIVE - exact matching          -->
+    <!-- ============================================ -->
+    <!--
+         By default routerLinkActive matches by PREFIX (subset):
+         '/elements' is also active on '/elements/new' and '/elements/1'.
+         That's why "My Collections" was always green.
+         { exact: true } makes it active ONLY on '/elements'.
+         ariaCurrentWhenActive adds aria-current="page" (accessibility).
+    -->
+    <a matButton routerLink="/elements"
+       routerLinkActive="active"
+       [routerLinkActiveOptions]="{ exact: true }"
+       ariaCurrentWhenActive="page">
+        <mat-icon>list</mat-icon>
+        My Collections
+    </a>
+
+    <a matButton routerLink="/elements/new"
+       routerLinkActive="active"
+       ariaCurrentWhenActive="page">
+        <mat-icon>add</mat-icon>
+        New element
+    </a>
+
+    <!-- Pushes the next links to the right -->
+    <span class="spacer"></span>
+
+    <a matButton routerLink="/elements">
+        <mat-icon>info</mat-icon>
+        About
+    </a>
+</mat-toolbar>

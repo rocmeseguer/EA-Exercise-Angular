@@ -1,16 +1,21 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 
 import { NavigateComponent } from './components/navigate/navigate.component';
 
+/**
+ * ============================================
+ * STANDALONE COMPONENTS - Angular 21
+ * ============================================
+ * Since Angular 19 every component is standalone by default,
+ * so 'standalone: true' is no longer needed.
+ */
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [CommonModule, RouterOutlet, NavigateComponent],
+  imports: [RouterOutlet, NavigateComponent],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'ea-exercise-angular';
+  protected readonly title = 'ea-exercise-angular';
 }

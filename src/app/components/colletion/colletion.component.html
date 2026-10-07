@@ -1,72 +1,93 @@
 <!-- ============================================ -->
-<!-- DIRECTIVES STRUCTURALS - *ngIf -->
-<!-- ============================================ -->
-
-<!-- *ngIf: Conditional rendering -->
-<!-- Shows loading message when data is being fetched -->
-<div *ngIf="_isLoading">
-    <p>Loading...</p>
-</div>
-
-<!-- *ngIf with else: Shows message when no data -->
-<div *ngIf="!_isLoading && _filteredTodos.length === 0">
-    <p>No todos found</p>
-</div>
-
-<!-- Shows error message if exists -->
-<div *ngIf="_message && !_isLoading">
-    <p>{{ _message }}</p>
-</div>
-
-<!-- ============================================ -->
-<!-- REACTIVE FORMS - Property & Event Binding -->
+<!-- REACTIVE FORMS + ANGULAR MATERIAL            -->
 <!-- ============================================ -->
 
 <!-- PROPERTY BINDING: [formGroup] binds FormGroup to form element -->
 <!-- EVENT BINDING: (ngSubmit) binds form submission event -->
-<form [formGroup]="_form" (ngSubmit)="onSubmit()">
-    <!-- INPUT: Text field for search -->
-    <input type="text" formControlName="title" placeholder="Search todos...">
-    
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="search-form">
+    <!-- mat-form-field: Material wrapper (label, outline, icons, errors) -->
+    <!-- matInput: makes the native <input> a Material input -->
+    <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search todos</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput type="text" formControlName="title">
+    </mat-form-field>
+
     <!-- PROPERTY BINDING: [disabled] - button disabled when form is invalid -->
-    <input type="submit" value="Filter" [disabled]="_form.invalid">
+    <!-- matButton="filled": Material filled button -->
+    <button matButton="filled" type="submit" [disabled]="form.invalid">Filter</button>
 </form>
 
-<!-- Filter status buttons -->
-<div class="filter-buttons">
-    <!-- EVENT BINDING: (click) triggers method -->
-    <button (click)="onFilterStatusChange('all')">All</button>
-    <button (click)="onFilterStatusChange('completed')">Completed</button>
-    <button (click)="onFilterStatusChange('pending')">Pending</button>
-</div>
+<!-- ============================================ -->
+<!-- MATERIAL BUTTON TOGGLE - Filter status       -->
+<!-- ============================================ -->
+<!-- PROPERTY BINDING: [value] selects the toggle of the current filter -->
+<!-- EVENT BINDING: (change) emits the selected value in $event.value -->
+<mat-button-toggle-group [value]="filterStatus()"
+                         (change)="onFilterStatusChange($event.value)"
+                         aria-label="Filter by status">
+    <mat-button-toggle value="all">All</mat-button-toggle>
+    <mat-button-toggle value="completed">Completed</mat-button-toggle>
+    <mat-button-toggle value="pending">Pending</mat-button-toggle>
+</mat-button-toggle-group>
 
 <!-- ============================================ -->
-<!-- DIRECTIVES STRUCTURALS - *ngFor -->
+<!-- CONTROL FLOW - @if (Angular 17+)             -->
+<!-- ============================================ -->
+<!-- Replaces the *ngIf structural directive.     -->
+<!-- No import needed: it is part of the template syntax. -->
+<!-- Signals are read by calling them: isLoading() -->
+
+<!-- @if / @else if: Conditional rendering -->
+@if (isLoading()) {
+    <!-- Shows a Material progress bar while data is being fetched -->
+    <mat-progress-bar mode="indeterminate" />
+} @else if (filteredTodos().length === 0) {
+    <!-- Shows message when no data -->
+    <p class="info">No todos found</p>
+}
+
+<!-- Shows error message if exists -->
+@if (message() && !isLoading()) {
+    <p class="message">{{ message() }}</p>
+}
+
+<!-- ============================================ -->
+<!-- CONTROL FLOW - @for (Angular 17+)            -->
 <!-- ============================================ -->
 
-<!-- *ngFor: Iterates over array to create repeated elements -->
-<!-- Each todo becomes a TodoItemComponent with @Input/@Output -->
-<table class="table table-sm table-hover" *ngIf="!_isLoading && _filteredTodos.length > 0">
-    <tbody>
+<!-- @for: Iterates over array to create repeated elements (replaces *ngFor) -->
+<!-- 'track' is mandatory: identifies each item so Angular only -->
+<!-- re-renders the rows that changed -->
+<!-- Each todo becomes a TodoItemComponent with input()/output() -->
+@if (!isLoading() && filteredTodos().length > 0) {
+    <!-- ANGULAR MATERIAL: <mat-list> contains the <mat-list-item> of each child -->
+    <mat-list>
         <!-- COMPONENT ARCHITECTURE: Using child component -->
-        <!-- @Input() todo: passes each todo to child component -->
-        <!-- @Output() view/edit/delete: receives events from child -->
-        <tr *ngFor="let todo of _filteredTodos">
-            <app-todo-item 
+        <!-- input todo: passes each todo to child component -->
+        <!-- output view/edit/delete: receives events from child -->
+        @for (todo of filteredTodos(); track todo.id) {
+            <app-todo-item
                 [todo]="todo"
                 (view)="onView($event)"
                 (edit)="onEdit($event)"
-                (delete)="onDelete($event)">
-            </app-todo-item>
-        </tr>
-    </tbody>
-</table>
+                (delete)="onDelete($event)" />
+
+            <!-- @for context variable $last: no divider after the last item -->
+            @if (!$last) {
+                <mat-divider />
+            }
+        }
+    </mat-list>
+}
 
 <!-- ============================================ -->
 <!-- INTERPOLATION - Logic to View -->
 <!-- ============================================ -->
 
 <!-- Display count of todos using interpolation -->
-<p *ngIf="!_isLoading">
-    Total: {{ _filteredTodos.length }} todos
-</p>
+@if (!isLoading()) {
+    <p class="info">
+        Total: {{ filteredTodos().length }} todos
+    </p>
+}

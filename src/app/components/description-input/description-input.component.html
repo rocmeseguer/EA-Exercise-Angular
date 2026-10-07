@@ -1,0 +1,8 @@
+<!-- ANGULAR MATERIAL: mat-form-field + matInput (no forms module needed) -->
+<mat-form-field appearance="outline">
+    <mat-label>Description (Two-way binding demo)</mat-label>
+    <!-- PROPERTY BINDING [value]: component -> view -->
+    <!-- EVENT BINDING (input):    view -> component -->
+    <input matInput type="text" [value]="value()" (input)="onInput($event)"
+           placeholder="Type something...">
+</mat-form-field>

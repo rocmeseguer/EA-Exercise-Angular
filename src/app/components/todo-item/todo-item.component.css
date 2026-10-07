@@ -2,18 +2,21 @@
 /* COMPONENT STYLES - SCOPED TO COMPONENT        */
 /* ============================================ */
 
+/* :host = the <app-todo-item> element itself.
+   Custom elements are 'inline' by default: make it a block row. */
+:host {
+    display: block;
+}
+
+/* Colors from the Material theme (system variables) */
 .completed {
-    color: green;
-    font-weight: bold;
+    color: var(--mat-sys-primary);
 }
 
 .pending {
-    color: orange;
-    font-weight: bold;
+    color: var(--mat-sys-tertiary);
 }
 
-button {
-    margin: 2px;
-    padding: 4px 8px;
-    cursor: pointer;
+.actions {
+    display: flex;
 }

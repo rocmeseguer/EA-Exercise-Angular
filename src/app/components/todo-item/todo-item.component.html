@@ -1,29 +1,52 @@
 <!-- ============================================ -->
 <!-- DATA BINDING EXAMPLES IN THIS TEMPLATE -->
 <!-- ============================================ -->
+<!--
+     ANGULAR MATERIAL - <mat-list-item>
+     Each todo is one item of the parent's <mat-list>.
+     Content slots of a list item:
+     - matListItemIcon:  icon on the left
+     - matListItemTitle: first line
+     - matListItemLine:  secondary line
+     - matListItemMeta:  content on the right (action buttons)
+-->
+<mat-list-item>
 
-<!-- INTERPOLATION - Logic to View -->
-<!-- Displays the todo title in uppercase using the built-in 'uppercase' pipe -->
-<td>{{ todo.title | uppercase }}</td>
-
-<!-- PROPERTY BINDING - Logic to View -->
-<!-- The class attribute is bound conditionally based on todo.completed -->
-<td>
-    <span [class.completed]="todo.completed" [class.pending]="!todo.completed">
+    <!-- PROPERTY BINDING - Logic to View -->
+    <!-- The class attribute is bound conditionally based on todo().completed -->
+    <mat-icon matListItemIcon
+              [class.completed]="todo().completed"
+              [class.pending]="!todo().completed">
         <!-- INTERPOLATION - Displaying computed values -->
-        {{ todo.completed ? '✔ Completado' : '⏳ Pendiente' }}
-    </span>
-</td>
+        {{ todo().completed ? 'check_circle' : 'schedule' }}
+    </mat-icon>
 
-<!-- EVENT BINDING - User action triggers method -->
-<!-- (click) binds the click event to the component's method -->
-<td>
-    <!-- VIEW BUTTON -->
-    <button (click)="onView()">View</button>
-    
-    <!-- EDIT BUTTON -->
-    <button (click)="onEdit()">Edit</button>
-    
-    <!-- DELETE BUTTON -->
-    <button (click)="onDelete()">Delete</button>
-</td>
+    <!-- INTERPOLATION - Logic to View -->
+    <!-- Displays the todo title in uppercase using the built-in 'uppercase' pipe -->
+    <span matListItemTitle>{{ todo().title | uppercase }}</span>
+
+    <span matListItemLine [class.completed]="todo().completed" [class.pending]="!todo().completed">
+        {{ todo().completed ? 'Completado' : 'Pendiente' }}
+    </span>
+
+    <!-- EVENT BINDING - User action triggers method -->
+    <!-- (click) binds the click event to the component's method -->
+    <!-- matIconButton: round button with only an icon (aria-label for accessibility) -->
+    <!-- matTooltip: text shown on hover -->
+    <span matListItemMeta class="actions">
+        <!-- VIEW BUTTON -->
+        <button matIconButton (click)="onView()" matTooltip="View" aria-label="View">
+            <mat-icon>visibility</mat-icon>
+        </button>
+
+        <!-- EDIT BUTTON -->
+        <button matIconButton (click)="onEdit()" matTooltip="Edit" aria-label="Edit">
+            <mat-icon>edit</mat-icon>
+        </button>
+
+        <!-- DELETE BUTTON -->
+        <button matIconButton (click)="onDelete()" matTooltip="Delete" aria-label="Delete">
+            <mat-icon>delete</mat-icon>
+        </button>
+    </span>
+</mat-list-item>

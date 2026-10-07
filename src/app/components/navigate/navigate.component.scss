@@ -1,0 +1,48 @@
+@use '@angular/material' as mat;
+
+/* ============================================ */
+/* ANGULAR MATERIAL - Customizing components    */
+/* ============================================ */
+/*
+   Material components are styled with design tokens (CSS variables).
+   The *-overrides() mixins change those tokens in a safe, typed way,
+   instead of overwriting Material's internal CSS classes.
+
+   Colors come from the theme (src/material-theme.scss) through
+   system variables: --mat-sys-primary, --mat-sys-on-primary, ...
+   Changing the theme palette changes the navbar automatically.
+*/
+
+/* Toolbar: primary color background */
+.navbar {
+  @include mat.toolbar-overrides((
+    container-background-color: var(--mat-sys-primary),
+    container-text-color: var(--mat-sys-on-primary),
+  ));
+
+  /* 1. NORMAL link: text in 'on-primary' color */
+  /* 2. HOVER link:  Material's state layer darkens/lightens the button */
+  @include mat.button-overrides((
+    text-label-text-color: var(--mat-sys-on-primary),
+    text-state-layer-color: var(--mat-sys-on-primary),
+    text-ripple-color: color-mix(in srgb, var(--mat-sys-on-primary) 20%, transparent),
+    text-hover-state-layer-opacity: 0.16,
+  ));
+
+  gap: 8px;
+}
+
+/* 3. ACTIVE link (class added by routerLinkActive) */
+.navbar .active {
+  @include mat.button-overrides((
+    text-label-text-color: var(--mat-sys-on-primary-container),
+    text-state-layer-color: var(--mat-sys-on-primary-container),
+  ));
+
+  background-color: var(--mat-sys-primary-container);
+}
+
+/* Flexible empty space: pushes the following items to the right */
+.spacer {
+  flex: 1 1 auto;
+}

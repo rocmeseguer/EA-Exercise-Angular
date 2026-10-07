@@ -1,37 +1,23 @@
-input[type=text], select, textarea {
-    width: 30%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    resize: vertical;
-  }
+/* Layout only: colors, fonts and shapes come from Angular Material */
 
-  input[type=button], input[type=submit], input[type=reset] {
-    background-color: #04AA6D;
-    border: none;
-    color: white;
-    padding: 16px 32px;
-    text-decoration: none;
-    margin: 4px 2px;
-    cursor: pointer;
-  }
+.search-form {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
 
-  /* Filter buttons */
-  .filter-buttons {
-    margin: 10px 0;
-  }
+.search-field {
+  flex: 1;
+}
 
-  .filter-buttons button {
-    background-color: #2196F3;
-    border: none;
-    color: white;
-    padding: 8px 16px;
-    margin: 2px;
-    cursor: pointer;
-    border-radius: 4px;
-  }
+mat-button-toggle-group {
+  margin-bottom: 16px;
+}
 
-  .filter-buttons button:hover {
-    background-color: #0b7dda;
-  }
+.info {
+  color: var(--mat-sys-on-surface-variant);
+}
 
+.message {
+  color: var(--mat-sys-error);
+}
